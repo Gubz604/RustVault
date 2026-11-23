@@ -23,12 +23,18 @@ impl Vault {
     pub(crate) fn get(&self, label: &str) -> Option<&Entry> {
         self.entries.iter().find(|existing| existing.get_label() == label)
     }
+
+    pub(crate) fn labels(&self) -> impl Iterator<Item = &str> {
+        self.entries.iter().map(|entry| entry.get_label())
+    }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use super::Vault;
+    use std::assert_eq;
+
+use super::Vault;
     use super::Entry;
 
     #[test]
@@ -89,5 +95,31 @@ mod tests {
         vault.add(entry_1).expect("Each entry label must be unique");
         assert_eq!(vault.entries.len(), 1);
         assert!(vault.get("GitHub").is_none());
+    }
+
+    #[test]
+    fn empty_vault_yields_no_labels() {
+        let vault = Vault::new();
+
+        assert!(vault.labels().next().is_none());
+    }
+
+    #[test]
+    fn labels_preserve_insertion_order() {
+        let mut vault = Vault::new();
+
+        let entry_1 = Entry::new("work-email".to_string(), "user1".to_string(), "pass1".to_string()).expect("a nonblank label should be accepted");
+        let entry_2 = Entry::new("github".to_string(), "user2".to_string(), "pass2".to_string()).expect("a nonblank label should be accepted");
+
+        vault.add(entry_1).expect("Each entry label must be unique");
+        vault.add(entry_2).expect("Each entry label must be unique");
+
+        let labels: Vec<&str> = vault.labels().collect();
+        let compare_labels = [
+            "work-email",
+            "github",
+        ];
+
+        assert_eq!(labels, compare_labels);
     }
 }
