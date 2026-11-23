@@ -16,6 +16,14 @@ impl Entry {
             password,
         })
     }
+
+    pub(crate) fn get_label(&self) -> &str {
+        &self.label
+    }
+
+    pub(crate) fn get_username(&self) -> &str {
+        &self.username
+    }
 }
 
 #[cfg(test)]
